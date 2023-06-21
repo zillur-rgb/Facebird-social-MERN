@@ -5,4 +5,5 @@ export type IPost = {
   profilePic: string;
   desc: string;
   img: string;
+  createdAt: string | Date;
 };

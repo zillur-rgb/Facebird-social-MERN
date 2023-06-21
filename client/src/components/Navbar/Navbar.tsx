@@ -7,8 +7,11 @@ import SearchOutlinedIcon from "@mui/icons-material/SearchOutlined";
 import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
 import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
 import NotificationsOutlinedIcon from "@mui/icons-material/NotificationsOutlined";
+import { useContext } from "react";
+import { AuthContext } from "../../context/authContext";
 
 const Navbar = () => {
+  const { currentUser } = useContext(AuthContext);
   return (
     <div className="Navbar">
       <div className="left">
@@ -35,7 +38,7 @@ const Navbar = () => {
             src="https://images.pexels.com/photos/3777943/pexels-photo-3777943.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1"
             alt="Profile photo"
           />
-          <span>John Doe</span>
+          <span>{currentUser.name}</span>
         </div>
       </div>
     </div>
