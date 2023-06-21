@@ -12,10 +12,11 @@ import LeftBar from "./components/left-bar/LeftBar";
 import RightBar from "./components/right-bar/RightBar";
 import Home from "./pages/home/Home";
 import Profile from "./pages/profile/Profile";
-
-let currentUser = true;
+import { AuthContext } from "./context/authContext";
+import { useContext } from "react";
 
 const ProtectedRoute = ({ children }: { children: any }) => {
+  const { currentUser } = useContext(AuthContext);
   if (!currentUser) {
     return <Navigate to={"/login"} />;
   }
