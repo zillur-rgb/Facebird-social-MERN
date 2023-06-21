@@ -14,6 +14,7 @@ import Home from "./pages/home/Home";
 import Profile from "./pages/profile/Profile";
 import { AuthContext } from "./context/authContext";
 import { useContext } from "react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 const ProtectedRoute = ({ children }: { children: any }) => {
   const { currentUser } = useContext(AuthContext);
@@ -56,9 +57,11 @@ function App() {
 
 export default App;
 
+const queryClient = new QueryClient();
+
 export const Layout = () => {
   return (
-    <div>
+    <QueryClientProvider client={queryClient}>
       <Navbar />
       <div style={{ display: "flex" }}>
         <LeftBar />
@@ -67,6 +70,6 @@ export const Layout = () => {
         </div>
         <RightBar />
       </div>
-    </div>
+    </QueryClientProvider>
   );
 };
