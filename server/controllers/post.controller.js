@@ -15,8 +15,11 @@ const getPosts = (req, res) => {
     // const q = `SELECT p.*, u.id AS userId, name, profilePic FROM posts AS p JOIN users AS u ON (u.id = p.userId)`;
 
     // Now if we want to see only our post and the id I follow. We need to add another table relationship and we will have to add the condition so that if post has only the id I follow or post has the id that belongs to me will be shown
-    const q = `SELECT p.*, u.id AS userId, name, profilePic FROM posts AS p JOIN users AS u ON (u.id = p.userId) 
-    LEFT JOIN relationships AS r ON (p.userId = r.followerUserId) WHERE r.followedUserId= ? OR p.userId =?`;
+    const q =
+      userId !== "undefined"
+        ? `SELECT p.*, u.id AS userId, name, profilePic FROM posts AS p JOIN users AS u ON (u.id = p.userId) WHERE p.userId = ? ORDER BY p.createdAt DESC`
+        : `SELECT p.*, u.id AS userId, name, profilePic FROM posts AS p JOIN users AS u ON (u.id = p.userId) 
+    LEFT JOIN relationships AS r ON (p.userId = r.followedUserId) WHERE r.followerUserId= ? OR p.userId =? ORDER BY p.createdAt DESC`;
     const values = (userId = "undefined"
       ? [userId]
       : [userInfo.id, userInfo.id]);
