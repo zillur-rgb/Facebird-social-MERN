@@ -4,4 +4,5 @@ export type IComment = {
   name: string;
   userId: number;
   profilePicture: string;
+  createdAt: Date;
 };

@@ -1,46 +1,78 @@
+import { useContext, useState } from "react";
 import { IComment } from "../../types/comment.type";
 import "./Comments.scss";
+import { AuthContext } from "../../context/authContext";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { apiRequest } from "../../helpers/apihelper";
+import moment from "moment";
 
-const Comments = () => {
-  //Temporary
-  const comments: IComment[] = [
-    {
-      id: 1,
-      desc: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Autem nequeaspernatur ullam aperiam. Lorem ipsum dolor sit amet consectetur adipisicing elit. Autem nequeaspernatur ullam aperiam",
-      name: "John Doe",
-      userId: 1,
-      profilePicture:
-        "https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
+const Comments = ({ postId }: { postId: number }) => {
+  const [desc, setDesc] = useState<string>("");
+  const { currentUser } = useContext(AuthContext);
+
+  // fetching comments
+  const { isLoading, data, error } = useQuery(["comments"], async () => {
+    const res = await apiRequest.get(`/comments?postId=${postId}`);
+    return res.data;
+  });
+
+  const queryClient = useQueryClient();
+
+  // Adding comments
+  const mutation = useMutation(
+    (newComment: { desc: string; postId: number }) => {
+      return apiRequest.post("/comments/add-comment", newComment);
     },
     {
-      id: 2,
-      desc: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Autem nequeaspernatur ullam aperiam",
-      name: "Jane Doe",
-      userId: 2,
-      profilePicture:
-        "https://images.pexels.com/photos/1036623/pexels-photo-1036623.jpeg?auto=compress&cs=tinysrgb&w=1600",
-    },
-  ];
+      onSuccess: () => {
+        // Invalidate and refetch
+        queryClient.invalidateQueries(["comments"]);
+      },
+    }
+  );
+
+  const handleClick = async (
+    e: React.MouseEvent<HTMLButtonElement, MouseEvent>
+  ) => {
+    e.preventDefault();
+    mutation.mutate({ desc, postId });
+    setDesc("");
+  };
   return (
     <div className="comments">
       <div className="write">
         <img
-          src="https://images.pexels.com/photos/3777943/pexels-photo-3777943.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1"
+          src={
+            currentUser.profilePic
+              ? currentUser.profilePic
+              : "https://images.pexels.com/photos/3777943/pexels-photo-3777943.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1"
+          }
           alt="Profile photo"
         />
-        <input type="text" placeholder="write a comment" />
-        <button>Send</button>
+        <input
+          type="text"
+          placeholder="write a comment"
+          value={desc}
+          onChange={(e) => setDesc(e.target.value)}
+        />
+        <button onClick={handleClick}>Comment</button>
       </div>
-      {comments.map((comment) => (
-        <div className="comment">
-          <img src={comment.profilePicture} alt="" />
-          <div className="info">
-            <span>{comment.name}</span>
-            <p>{comment.desc}</p>
-          </div>
-          <span className="date">1 hour ago</span>
-        </div>
-      ))}
+      {error
+        ? "Something went wrong!"
+        : isLoading
+        ? "loading"
+        : data.map((comment: IComment) => (
+            <div className="comment" key={comment.id}>
+              <img src={comment.profilePicture} alt="" />
+              <div className="info">
+                <span>{comment.name}</span>
+                <p>{comment.desc}</p>
+              </div>
+              <span className="date">
+                {moment(comment.createdAt).fromNow()}
+              </span>
+            </div>
+          ))}
     </div>
   );
 };
