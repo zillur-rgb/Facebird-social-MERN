@@ -10,18 +10,47 @@ import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import Posts from "../../components/posts/Posts";
 import { useLocation } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "../../helpers/apihelper";
+import { useContext } from "react";
+import { AuthContext } from "../../context/authContext";
 
 const Profile = () => {
   const userId = Number(useLocation().pathname.split("/")[2]);
+  const { currentUser } = useContext(AuthContext);
 
   const { isLoading, error, data } = useQuery(["user"], async () => {
     const res = await apiRequest.get(`/users/${userId}`);
-    console.log("res", res.data);
-
     return res.data;
   });
+
+  const {
+    isLoading: rIsLoading,
+    error: rError,
+    data: rData,
+  } = useQuery(["relationships"], async () => {
+    const res = await apiRequest.get(`/relationships?followedUserId=${userId}`);
+    return res.data;
+  });
+
+  const queryClient = useQueryClient();
+
+  const mutation = useMutation(
+    (following: boolean) => {
+      if (following)
+        return apiRequest.delete(`/relationships?userId=${userId}`);
+      return apiRequest.post("/relationships", { userId });
+    },
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries(["relationships"]);
+      },
+    }
+  );
+
+  const handleFollow = () => {
+    mutation.mutate(rData.includes(currentUser.id));
+  };
   return (
     <div className="profile">
       {isLoading ? (
@@ -79,7 +108,17 @@ const Profile = () => {
                     <span>{data.website}</span>
                   </div>
                 </div>
-                <button>follow</button>
+                {rIsLoading ? (
+                  "Loading..."
+                ) : rError ? (
+                  "Error"
+                ) : userId === currentUser.id ? (
+                  <button>Update</button>
+                ) : (
+                  <button onClick={handleFollow}>
+                    {rData.includes(currentUser.id) ? "Following" : "Follow"}
+                  </button>
+                )}
               </div>
               <div className="right">
                 <EmailOutlinedIcon />

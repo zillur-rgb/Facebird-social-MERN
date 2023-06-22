@@ -8,6 +8,7 @@ import { postRouter } from "./routes/post.route.js";
 import multer from "multer";
 import { CommentRouter } from "./routes/comment.route.js";
 import { LikeRouter } from "./routes/like.route.js";
+import { RelationshipRoute } from "./routes/relationship.route.js";
 const app = express();
 
 //Middlewares
@@ -39,5 +40,6 @@ app.use("/api/v1/auth", AuthRouter);
 app.use("/api/v1/posts", postRouter);
 app.use("/api/v1/comments", CommentRouter);
 app.use("/api/v1/likes", LikeRouter);
+app.use("/api/v1/relationships", RelationshipRoute);
 
 app.listen(5000, () => console.log("API Working"));
