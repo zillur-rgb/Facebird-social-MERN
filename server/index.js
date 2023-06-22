@@ -7,6 +7,7 @@ import cors from "cors";
 import { postRouter } from "./routes/post.route.js";
 import multer from "multer";
 import { CommentRouter } from "./routes/comment.route.js";
+import { LikeRouter } from "./routes/like.route.js";
 const app = express();
 
 //Middlewares
@@ -37,5 +38,6 @@ app.use("/api/v1/users", usersRouter);
 app.use("/api/v1/auth", AuthRouter);
 app.use("/api/v1/posts", postRouter);
 app.use("/api/v1/comments", CommentRouter);
+app.use("/api/v1/likes", LikeRouter);
 
 app.listen(5000, () => console.log("API Working"));
